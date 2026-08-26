@@ -114,6 +114,14 @@ function resolveModel(model) {
   return model; // déjà un identifiant xKiro complet (vendeur/modèle) ou on laisse xKiro trancher
 }
 
+// Retire le bloc <think>...</think> si le modèle l'a renvoyé malgré thinking:false
+function stripThinking(content) {
+  if (!SHOW_REASONING && typeof content === 'string') {
+    return content.replace(/<think>[\s\S]*?<\/think>\s*/gi, '').trim();
+  }
+  return content;
+}
+
 // ---- Endpoints ----
 app.get('/', (req, res) => {
   res.json({
@@ -175,6 +183,11 @@ app.post('/v1/chat/completions', async (req, res) => {
     if (top_p !== undefined) xkiroRequest.top_p = top_p;
     if (frequency_penalty !== undefined) xkiroRequest.frequency_penalty = frequency_penalty;
     if (presence_penalty !== undefined) xkiroRequest.presence_penalty = presence_penalty;
+    if (!ENABLE_THINKING_MODE) {
+      // Coupe le mode thinking pour les modèles qui le supportent (Qwen, DeepSeek...).
+      // Ignoré silencieusement par les modèles qui n'ont pas ce paramètre.
+      xkiroRequest.chat_template_kwargs = { thinking: false };
+    }
 
     const response = await callXkiro(xkiroRequest, !!stream);
 
@@ -209,6 +222,7 @@ app.post('/v1/chat/completions', async (req, res) => {
       res.setHeader('Connection', 'keep-alive');
 
       let buffer = '';
+      let inThinkBlock = false; // état conservé entre chunks pour filtrer <think>...</think>
 
       response.data.on('data', (chunk) => {
         buffer += chunk.toString();
@@ -223,6 +237,28 @@ app.post('/v1/chat/completions', async (req, res) => {
           }
           try {
             const data = JSON.parse(line.slice(6));
+            if (!SHOW_REASONING) {
+              const delta = data.choices?.[0]?.delta;
+              if (delta && typeof delta.content === 'string') {
+                let text = delta.content;
+                let out = '';
+                while (text.length) {
+                  if (inThinkBlock) {
+                    const end = text.indexOf('</think>');
+                    if (end === -1) { text = ''; break; }
+                    text = text.slice(end + 8);
+                    inThinkBlock = false;
+                  } else {
+                    const start = text.indexOf('<think>');
+                    if (start === -1) { out += text; text = ''; break; }
+                    out += text.slice(0, start);
+                    text = text.slice(start + 7);
+                    inThinkBlock = true;
+                  }
+                }
+                delta.content = out;
+              }
+            }
             res.write(`data: ${JSON.stringify(data)}\n\n`);
           } catch (e) {
             console.error('Parse stream chunk error:', e.message);
@@ -257,7 +293,7 @@ app.post('/v1/chat/completions', async (req, res) => {
       model,
       choices: response.data.choices.map((choice) => ({
         index: choice.index,
-        message: { role: choice.message?.role || 'assistant', content: choice.message?.content || '' },
+        message: { role: choice.message?.role || 'assistant', content: stripThinking(choice.message?.content) || '' },
         finish_reason: choice.finish_reason,
       })),
       usage: response.data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
