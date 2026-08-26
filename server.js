@@ -34,6 +34,9 @@ const DEFAULT_MAX_TOKENS = parseInt(process.env.DEFAULT_MAX_TOKENS || '4096', 10
 // Complète cette liste avec GET https://api.xkiro.com/v1/models
 const MODEL_MAPPING = {
   'DEEP4F': 'deepseek/deepseek-v4-flash',
+  'DEEP4P': 'deepseek/deepseek-v4-pro',
+  'MMX27': 'minimax/minimax-m2.7',
+  'MISTRALL': 'mistralai/mistral-large-2512',
 };
 
 // =====================================================================
