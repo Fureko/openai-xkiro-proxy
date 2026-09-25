@@ -35,7 +35,7 @@ const DEFAULT_MAX_TOKENS = parseInt(process.env.DEFAULT_MAX_TOKENS || '4096', 10
 const MODEL_MAPPING = {
   'DEEP4F': 'deepseek/deepseek-v4-flash',
   'DEEP4P': 'deepseek/deepseek-v4-pro',
-  'MMX27': 'minimax/minimax-m2.7',
+  'MMX3': 'minimax/minimax-m3:free',
   'MISTRALL': 'mistralai/mistral-large-2512',
 };
 
