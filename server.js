@@ -33,12 +33,10 @@ const DEFAULT_MAX_TOKENS = parseInt(process.env.DEFAULT_MAX_TOKENS || '4096', 10
 // Mapping des modèles (alias pratiques -> ID xKiro réel avec préfixe vendeur)
 // Complète cette liste avec GET https://api.xkiro.com/v1/models
 const MODEL_MAPPING = {
-  'DEEP41F': 'deepseek/deepseek-v4.1-flash', // V4.1 Flash (New)
-  'DEEP4P': 'deepseek/deepseek-v4-pro',
+  'DEEP41F': 'deepseek/deepseek-v4.1-flash:free',
   'DEEP4F': 'deepseek/deepseek-v4-flash',
-  'DEEP32': 'deepseek/deepseek-v3.2',
-  'DEEP31': 'deepseek/deepseek-chat-v3.1',
-  'MMX3': 'minimax/minimax-m3:free',
+  'DEEP4P': 'deepseek/deepseek-v4-pro',
+  'MMX27': 'minimax/minimax-m2.7',
   'MISTRALL': 'mistralai/mistral-large-2512',
 };
 
