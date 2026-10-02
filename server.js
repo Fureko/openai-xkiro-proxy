@@ -38,7 +38,8 @@ const MODEL_MAPPING = {
   'DEEP4P': 'deepseek/deepseek-v4-pro',
   'MMX27': 'minimax/minimax-m2.7',
   'MISTRALL': 'mistralai/mistral-large-2512',
-  'MIMO': 'xiaomi/mimo-v2.6-flash:free',
+  'MIMO': 'xiaomi/mimo-v2.6-flash:free'
+  'MIMO2': 'xiaomi/mimo-v2.6-flash',
   
 };
 
